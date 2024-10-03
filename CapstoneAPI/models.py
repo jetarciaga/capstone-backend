@@ -60,6 +60,12 @@ class Requirement(models.Model):
     def __str__(self):
         return self.name
 
-# class Schedule(models.Model):
-#     """Schedule Object."""
-#     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+class Schedule(models.Model):
+    """Schedule Object."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    appointment_date = models.DateField()
+    purpose = models.ForeignKey(BarangayDocument, on_delete=models.CASCADE)
+    timeslot = models.TimeField()
+
+    def __str__(self):
+        return f"{self.user.email} - {self.purpose}"

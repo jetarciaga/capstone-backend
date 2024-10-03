@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, BarangayDocument, Requirement
-
+from .models import CustomUser, BarangayDocument, Requirement, Schedule
 
 
 class CustomUserAdmin(UserAdmin):
@@ -52,6 +51,19 @@ class RequirementAdmin(admin.ModelAdmin):
     )
 
 
+class ScheduleAdmin(admin.ModelAdmin):
+    model = Schedule
+    list_display = ('user', 'appointment_date', 'purpose', 'timeslot')
+    search_fields = ('user', 'appointment_date', 'purpose')
+
+    add_fields = (
+        None, {
+            'classes': ('wide',),
+            'fields': ('user', 'appointment_date', 'purpose', 'timeslot'),
+        }
+    )
+
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(BarangayDocument, BarangayDocumentAdmin)
 admin.site.register(Requirement, RequirementAdmin)
+admin.site.register(Schedule, ScheduleAdmin)
