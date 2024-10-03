@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
 
 class CustomUserManager(BaseUserManager):
@@ -30,6 +31,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(_("email_address"), unique=True)
     firstname = models.CharField(max_length=50, blank=True)
     lastname = models.CharField(max_length=50, blank=True)
+    date_joined = models.DateTimeField(auto_now_add=True)
+    last_login = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
@@ -40,3 +43,23 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+class BarangayDocument(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    requirements = models.ManyToManyField('Requirement', related_name='barangay_documents', blank=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Requirement(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+# class Schedule(models.Model):
+#     """Schedule Object."""
+#     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
