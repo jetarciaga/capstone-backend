@@ -53,11 +53,16 @@ class BarangayDocumentListView(APIView):
 
 
 class ScheduleListView(GenericAPIView):
-    queryset = Schedule.objects.all()
     serializer_class = ScheduleSerializer
     filter_backends = [OrderingFilter]
-    ordering_fields = ['appointment_date', 'timeslot']
+    ordering_fields = ['date', 'timeslot']
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return Schedule.objects.all()
+        else:
+            return Schedule.objects.filter(user=self.request.user)
 
     def get(self, request):
         queryset = self.filter_queryset(self.get_queryset())
