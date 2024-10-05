@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
+from datetime import time, date, timedelta
+from django.core.exceptions import ValidationError
 
 
 class CustomUserManager(BaseUserManager):
@@ -63,9 +65,32 @@ class Requirement(models.Model):
 class Schedule(models.Model):
     """Schedule Object."""
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    appointment_date = models.DateField()
+    date = models.DateField()
     purpose = models.ForeignKey(BarangayDocument, on_delete=models.CASCADE)
     timeslot = models.TimeField()
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['date', 'timeslot'], name='unique_schedule')
+        ]
+        ordering = ['date', 'timeslot']
+
+    def clean(self):
+        if self.date <= date.today():
+            raise ValidationError('The date must be tomorrow or later.')
+
+        start_time = time(9, 0)
+        end_time = time(15, 30)
+
+        if not (start_time <= self.timeslot <= end_time):
+            raise ValidationError(f'Time must be between {start_time} and {end_time}')
+
+        if self.timeslot.minute % 30 != 0 or self.timeslot.second != 0:
+            raise ValidationError('Time must be in 30-minute intervals.')
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.user.email} - {self.purpose}"
+        return f"{self.purpose} [{self.user.email}]"

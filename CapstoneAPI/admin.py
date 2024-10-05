@@ -53,13 +53,13 @@ class RequirementAdmin(admin.ModelAdmin):
 
 class ScheduleAdmin(admin.ModelAdmin):
     model = Schedule
-    list_display = ('user', 'appointment_date', 'purpose', 'timeslot')
-    search_fields = ('user', 'appointment_date', 'purpose')
+    list_display = ('purpose', 'date', 'timeslot', 'user')
+    search_fields = ('user', 'date', 'purpose')
 
     add_fields = (
         None, {
             'classes': ('wide',),
-            'fields': ('user', 'appointment_date', 'purpose', 'timeslot'),
+            'fields': ('purpose', 'date', 'timeslot', 'user'),
         }
     )
 

@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework.authtoken',
+    # 'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'CapstoneAPI',
@@ -157,3 +157,6 @@ SIMPLEJWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADERS_TYPES': ('Bearer',),
 }
+
+TIME_ZONE = 'Asia/Manila'
+USE_TZ = True
