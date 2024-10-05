@@ -44,7 +44,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Schedule
-        fields = ['id', 'user', 'date', 'purpose', 'timeslot', 'document_id']
+        fields = ['id', 'user', 'date', 'purpose', 'timeslot', 'status', 'document_id']
 
     def validate_date(self, value):
         if value <= date.today():

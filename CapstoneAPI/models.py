@@ -64,10 +64,18 @@ class Requirement(models.Model):
 
 class Schedule(models.Model):
     """Schedule Object."""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('ongoing', 'Ongoing'),
+        ('cancelled', 'Cancelled'),
+        ('done', 'Done'),
+    ]
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date = models.DateField()
     purpose = models.ForeignKey(BarangayDocument, on_delete=models.CASCADE)
     timeslot = models.TimeField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
 
     class Meta:
         constraints = [
