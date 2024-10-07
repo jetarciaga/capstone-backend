@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.filters import OrderingFilter
 from .serializers import CustomUserSerializer, BarangayDocumentSerializer, ScheduleSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import BarangayDocument, Schedule
 from django.shortcuts import get_object_or_404
 
@@ -55,7 +55,7 @@ class BarangayDocumentListView(APIView):
 class ScheduleListView(GenericAPIView):
     serializer_class = ScheduleSerializer
     filter_backends = [OrderingFilter]
-    ordering_fields = ['date', 'timeslot']
+    ordering_fields = ['date', 'timeslot', 'status']
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
