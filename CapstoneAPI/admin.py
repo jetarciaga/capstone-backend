@@ -5,21 +5,22 @@ from .models import CustomUser, BarangayDocument, Requirement, Schedule
 
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
-    list_display = ('email', 'firstname', 'lastname', 'is_staff', 'is_active', 'last_login', 'date_joined')
+    list_display = ('firstname', 'lastname', 'birthday', 'email', 'is_staff', 'is_active', 'last_login', 'date_joined')
     list_filter = ('is_staff', 'is_active')
     ordering = ('email',)
     search_fields = ('email',)
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Personal Info', {'fields': ('firstname', 'lastname')}),
+        ('Personal Info', {'fields': ('firstname', 'lastname', 'birthday')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
+    list_display_links = ('email',)
     readonly_fields = ['last_login', 'date_joined']
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2', 'is_staff', 'is_active')}
+            'fields': ('firstname', 'lastname', 'birthday', 'email', 'password1', 'password2', 'is_staff', 'is_active')}
         ),
     )
 

@@ -1,19 +1,32 @@
-from djoser.serializers import UserCreateSerializer, UserSerializer
+from djoser.serializers import UserCreateSerializer, UserSerializer, UserCreatePasswordRetypeSerializer
 from rest_framework import serializers
 from .models import CustomUser, BarangayDocument, Requirement, Schedule
 from datetime import date, time
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
+    password2 = serializers.CharField(write_only=True)
+
     class Meta(UserCreateSerializer.Meta):
         model = CustomUser
-        fields = ('id', 'email', 'password')
+        fields = ('id', 'firstname', 'lastname', 'birthday', 'email', 'password', 'password2')
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def validate(self, data):
+        if data['password'] != data['password2']:
+            raise serializers.ValidationError("Password do not match")
+        return data
+
+    def create(self, validated_data):
+        validated_data.pop('password2')
+        user = CustomUser.objects.create_user(**validated_data)
+        return user
 
 
 class CustomUserSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):
         model = CustomUser
-        fields = ('id', 'email')
+        fields = ('id', 'email', 'firstname', 'lastname', 'birthday', 'is_staff')
 
 
 class RequirementSerializer(serializers.ModelSerializer):
