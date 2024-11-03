@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.filters import OrderingFilter
-from .serializers import CustomUserSerializer, BarangayDocumentSerializer, ScheduleSerializer
+from .serializers import CustomUserSerializer, BarangayDocumentSerializer, ScheduleSerializer, AvailableTimeSlotSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import BarangayDocument, Schedule
 from django.shortcuts import get_object_or_404
@@ -69,3 +69,16 @@ class ScheduleListView(GenericAPIView):
         serializer = self.get_serializer(queryset, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class AvailableTimeSlotView(APIView):
+    def get(self, request, *args, **kwargs):
+        selected_date = request.query_params.get("selected_date")
+        serializer = AvailableTimeSlotSerializer(data={"selected_date": selected_date})
+
+        if serializer.is_valid():
+            available_slots = serializer.get_available_slots()
+
+            if not available_slots:
+                return Response({"available_slots": []}, status=status.HTTP_200_OK)
+            return Response({"available_slots": available_slots}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

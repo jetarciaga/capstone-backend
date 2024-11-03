@@ -1,7 +1,7 @@
 from djoser.serializers import UserCreateSerializer, UserSerializer, UserCreatePasswordRetypeSerializer
 from rest_framework import serializers
 from .models import CustomUser, BarangayDocument, Requirement, Schedule
-from datetime import date, time
+from datetime import date, time, datetime, timedelta
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -86,3 +86,30 @@ class ScheduleSerializer(serializers.ModelSerializer):
         document = validated_data.pop('document_id')
         schedule = Schedule.objects.create(document=document, **validated_data)
         return schedule
+
+
+class AvailableTimeSlotSerializer(serializers.Serializer):
+    selected_date = serializers.DateField()
+
+    def validate_selected_date(self, value):
+        if value < datetime.now().date():
+            raise serializers.ValidationError("The date cannot be in the past.")
+        return value
+
+    def get_available_slots(self):
+        selected_date = self.validated_data["selected_date"]
+
+        start_time = datetime.combine(selected_date, time(9,0))
+        end_time = datetime.combine(selected_date, time(15, 30))
+        interval = timedelta(minutes=30)
+        all_slots = []
+
+        while start_time <= end_time:
+            all_slots.append(start_time.time())
+            start_time += interval
+
+        booked_slots = Schedule.objects.filter(date=selected_date).values_list("timeslot", flat=True)
+
+        available_slots = [slot.strftime("%H:%M") for slot in all_slots if slot not in booked_slots]
+
+        return available_slots

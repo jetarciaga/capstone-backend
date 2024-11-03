@@ -2,8 +2,9 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
-from datetime import time, date, timedelta
+from datetime import time, date, timedelta, datetime
 from django.core.exceptions import ValidationError
+from django.http import JsonResponse
 
 
 class CustomUserManager(BaseUserManager):
