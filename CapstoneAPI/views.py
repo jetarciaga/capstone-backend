@@ -71,9 +71,8 @@ class ScheduleListView(GenericAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class AvailableTimeSlotView(APIView):
-    def get(self, request, *args, **kwargs):
-        selected_date = request.query_params.get("selected_date")
-        serializer = AvailableTimeSlotSerializer(data={"selected_date": selected_date})
+    def post(self, request, *args, **kwargs):
+        serializer = AvailableTimeSlotSerializer(data=request.data)
 
         if serializer.is_valid():
             available_slots = serializer.get_available_slots()

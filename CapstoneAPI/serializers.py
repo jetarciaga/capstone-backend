@@ -109,7 +109,6 @@ class AvailableTimeSlotSerializer(serializers.Serializer):
             start_time += interval
 
         booked_slots = Schedule.objects.filter(date=selected_date).values_list("timeslot", flat=True)
-
         available_slots = [slot.strftime("%H:%M") for slot in all_slots if slot not in booked_slots]
 
         return available_slots
