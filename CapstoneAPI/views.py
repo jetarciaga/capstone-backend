@@ -33,6 +33,15 @@ class BarangayDocumentAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class BarangayRequirementsListView(APIView):
+    def get(self, request, name):
+        document = get_object_or_404(BarangayDocument, name=name)
+        serializer = BarangayDocumentSerializer(document)
+
+        data = serializer.data["requirements"]
+        return Response(data, status=status.HTTP_200_OK)
+
+
 class BarangayDocumentListView(APIView):
     def get(self, request):
         document = BarangayDocument.objects.all()

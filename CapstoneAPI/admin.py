@@ -25,18 +25,29 @@ class CustomUserAdmin(UserAdmin):
     )
 
 
+class RequirementInline(admin.TabularInline):
+    model = BarangayDocument.requirements.through
+    extra = 1
+
+
 class BarangayDocumentAdmin(admin.ModelAdmin):
-    model = BarangayDocument
+    # model = BarangayDocument
     list_display = ('name', 'description')
     search_fields = ('name',)
     list_filter = ('requirements',)
+    exclude = ('requirements',)
+    inlines = [RequirementInline]
 
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('name', 'description', 'requirements')
-        })
-    )
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        form.save_m2m()
+
+    # add_fieldsets = (
+    #     (None, {
+    #         'classes': ('wide',),
+    #         'fields': ('name', 'description', 'requirements')
+    #     })
+    # )
 
 
 class RequirementAdmin(admin.ModelAdmin):
@@ -68,3 +79,4 @@ admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(BarangayDocument, BarangayDocumentAdmin)
 admin.site.register(Requirement, RequirementAdmin)
 admin.site.register(Schedule, ScheduleAdmin)
+# admin.site.unregister(BarangayDocument.requirements.through)
