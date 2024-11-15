@@ -52,12 +52,13 @@ class BarangayDocumentSerializer(serializers.ModelSerializer):
 
 class ScheduleSerializer(serializers.ModelSerializer):
     # purpose and document_id points to same thing.
-    user = CustomUserSerializer(required=True)
-    document_id = serializers.PrimaryKeyRelatedField(queryset=BarangayDocument.objects.all(), write_only=True)
+    # user = CustomUserSerializer(required=True)
+    user = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), required=True)
+    purpose = serializers.PrimaryKeyRelatedField(queryset=BarangayDocument.objects.all(), write_only=True)
 
     class Meta:
         model = Schedule
-        fields = ['id', 'user', 'date', 'purpose', 'timeslot', 'status', 'document_id']
+        fields = ['id', 'user', 'date', 'purpose', 'timeslot', 'status']
 
     def validate_date(self, value):
         if value <= date.today():
@@ -81,10 +82,12 @@ class ScheduleSerializer(serializers.ModelSerializer):
 
         if Schedule.objects.filter(date=date, timeslot=timeslot).exists():
             raise serializers.ValidationError("A schedule already exists for this date and time.")
+        return data
 
     def create(self, validated_data):
-        document = validated_data.pop('document_id')
-        schedule = Schedule.objects.create(document=document, **validated_data)
+        # document = validated_data.pop('document_id')
+        # validated_data["purpose"] = document
+        schedule = Schedule.objects.create(**validated_data)
         return schedule
 
 
@@ -112,3 +115,4 @@ class AvailableTimeSlotSerializer(serializers.Serializer):
         available_slots = [slot.strftime("%H:%M") for slot in all_slots if slot not in booked_slots]
 
         return available_slots
+

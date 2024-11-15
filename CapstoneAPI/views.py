@@ -34,8 +34,8 @@ class BarangayDocumentAPIView(APIView):
 
 
 class BarangayRequirementsListView(APIView):
-    def get(self, request, name):
-        document = get_object_or_404(BarangayDocument, name=name)
+    def get(self, request, pk):
+        document = get_object_or_404(BarangayDocument, id=pk)
         serializer = BarangayDocumentSerializer(document)
 
         data = serializer.data["requirements"]
@@ -61,7 +61,7 @@ class BarangayDocumentListView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ScheduleListView(GenericAPIView):
+class ScheduleView(GenericAPIView):
     serializer_class = ScheduleSerializer
     filter_backends = [OrderingFilter]
     ordering_fields = ['date', 'timeslot', 'status']
@@ -78,6 +78,15 @@ class ScheduleListView(GenericAPIView):
         serializer = self.get_serializer(queryset, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            schedule = serializer.save()
+            return Response({"message": "Created Successfully", "data": serializer.data}, status=status.HTTP_201_CREATED)
+        return Response({
+            "errors": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 class AvailableTimeSlotView(APIView):
     def post(self, request, *args, **kwargs):
