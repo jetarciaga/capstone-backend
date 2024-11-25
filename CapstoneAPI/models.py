@@ -78,12 +78,13 @@ class Schedule(models.Model):
     purpose = models.ForeignKey(BarangayDocument, on_delete=models.CASCADE)
     timeslot = models.TimeField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    status_history = models.JSONField(default=list)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['date', 'timeslot'], name='unique_schedule')
         ]
-        ordering = ['date', 'timeslot']
+        ordering = ['-date', 'timeslot']
 
     def clean(self):
         if self.date <= date.today():
@@ -97,10 +98,6 @@ class Schedule(models.Model):
 
         if self.timeslot.minute % 30 != 0 or self.timeslot.second != 0:
             raise ValidationError('Time must be in 30-minute intervals.')
-
-    def save(self, *args, **kwargs):
-        self.clean()
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.purpose} [{self.user.email}]"

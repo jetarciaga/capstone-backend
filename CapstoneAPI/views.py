@@ -8,6 +8,7 @@ from .serializers import CustomUserSerializer, BarangayDocumentSerializer, Sched
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import BarangayDocument, Schedule
 from django.shortcuts import get_object_or_404
+from datetime import datetime
 
 
 User = get_user_model()
@@ -16,10 +17,14 @@ User = get_user_model()
 class UserList(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        if request.user.is_staff:
-            users = User.objects.all()
-            serializer = CustomUserSerializer(users, many=True)
+    def get(self, request, pk=None):
+        if pk:
+            users = get_object_or_404(User, pk=pk)
+            serializer = CustomUserSerializer(users)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        # if request.user.is_staff:
+        #     users = User.objects.all()
+        #     serializer = CustomUserSerializer(users, many=True)
         else:
             users = request.user
             serializer = CustomUserSerializer(users)
@@ -73,11 +78,15 @@ class ScheduleView(GenericAPIView):
         else:
             return Schedule.objects.filter(user=self.request.user)
 
-    def get(self, request):
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get(self, request, pk=None):
+        if pk:
+            schedule = get_object_or_404(self.get_queryset(), pk=pk)
+            serializer = self.get_serializer(schedule)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            queryset = self.filter_queryset(self.get_queryset())
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -87,6 +96,32 @@ class ScheduleView(GenericAPIView):
         return Response({
             "errors": serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk=None):
+
+        if not pk:
+            return Response({"error": "Appointment id is required for updating status"}, status=status.HTTP_400_BAD_REQUEST)
+
+        schedule = get_object_or_404(self.get_queryset(), pk=pk)
+        new_status = request.data.get("status")
+
+        if not new_status:
+            return Response({"error": "Status field is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if new_status not in dict(Schedule.STATUS_CHOICES).keys():
+            return Response({"error": f"Invalid status value. Allowed values are {', '.join(dict(Schedule.STATUS_CHOICES).keys())}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if schedule.status != new_status:
+            schedule.status_history.append({
+                "status": schedule.status,
+                "timestamp": datetime.now().isoformat()
+            })
+
+            schedule.status = new_status
+            schedule.save()
+
+        serializer = self.get_serializer(schedule)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class AvailableTimeSlotView(APIView):
     def post(self, request, *args, **kwargs):

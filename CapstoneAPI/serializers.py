@@ -54,15 +54,31 @@ class ScheduleSerializer(serializers.ModelSerializer):
     # purpose and document_id points to same thing.
     # user = CustomUserSerializer(required=True)
     user = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), required=True)
-    purpose = serializers.PrimaryKeyRelatedField(queryset=BarangayDocument.objects.all(), write_only=True)
+    purpose = serializers.PrimaryKeyRelatedField(queryset=BarangayDocument.objects.all())
+    purpose_name = serializers.SerializerMethodField()
+
 
     class Meta:
         model = Schedule
-        fields = ['id', 'user', 'date', 'purpose', 'timeslot', 'status']
+        fields = ['id', 'user', 'date', 'purpose', 'purpose_name', 'timeslot', 'status', "status_history"]
+
+    def get_purpose_name(self, obj):
+        if obj.purpose:
+            return obj.purpose.name
+        return None
+
+    def update(self, instance, validated_data):
+        """Handles updates to the schedule."""
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        # Save the instance; status_history is handled by the model's save() method
+        instance.save()
+        return instance
 
     def validate_date(self, value):
-        if value <= date.today():
-            raise serializers.ValidationError('The date must be tomorrow or later.')
+        if not self.instance:
+            if value <= date.today():
+                raise serializers.ValidationError('The date must be tomorrow or later.')
         return value
 
     def validate_timeslot(self, value):
