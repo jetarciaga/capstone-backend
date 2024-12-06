@@ -9,6 +9,8 @@ djangorestframework = "*"
 djangorestframework-simplejwt = "~=5.2.1"
 djoser = "*"
 django-cors-headers = "*"
+boto3 = "*"
+python-decouple = "*"
 
 [dev-packages]
 
