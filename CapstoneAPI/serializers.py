@@ -69,8 +69,19 @@ class ScheduleSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """Handles updates to the schedule."""
+        print("PATCH requests triggered")
+
+        if "status" in validated_data:
+            status = validated_data.get("status")
+            mapping = {
+                "pending": "ongoing",
+                "ongoing": "done"
+            }
+            instance.status = mapping[status]
+
         for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+            if attr != "status":
+                setattr(instance, attr, value)
         # Save the instance; status_history is handled by the model's save() method
         instance.save()
         return instance

@@ -85,6 +85,17 @@ class ScheduleView(GenericAPIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             queryset = self.filter_queryset(self.get_queryset())
+
+            filter_date = request.query_params.get("date", None)
+            if filter_date:
+                try:
+                    date_obj = datetime.strptime(filter_date, "%Y-%m-%d").date()
+                    queryset = queryset.filter(date=date_obj)
+                except ValueError:
+                    return Response(
+                        {"error": "Invalid date format. User YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST
+                    )
+
             serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
