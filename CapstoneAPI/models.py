@@ -1,5 +1,9 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from datetime import time, date, timedelta, datetime
@@ -42,7 +46,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     objects = CustomUserManager()
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     def __str__(self):
@@ -52,7 +56,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 class BarangayDocument(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
-    requirements = models.ManyToManyField('Requirement', related_name='barangay_documents', blank=True)
+    requirements = models.ManyToManyField(
+        "Requirement", related_name="barangay_documents", blank=True
+    )
 
     def __str__(self):
         return self.name
@@ -64,40 +70,52 @@ class Requirement(models.Model):
     def __str__(self):
         return self.name
 
+
 class Schedule(models.Model):
     """Schedule Object."""
+
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('ongoing', 'Ongoing'),
-        ('cancelled', 'Cancelled'),
-        ('done', 'Done'),
+        ("pending", "Pending"),
+        ("ongoing", "Ongoing"),
+        ("cancelled", "Cancelled"),
+        ("done", "Done"),
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date = models.DateField()
     purpose = models.ForeignKey(BarangayDocument, on_delete=models.CASCADE)
     timeslot = models.TimeField()
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
     status_history = models.JSONField(default=list)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['date', 'timeslot'], name='unique_schedule')
+            models.UniqueConstraint(fields=["date", "timeslot"], name="unique_schedule")
         ]
-        ordering = ['-date', 'timeslot']
+        ordering = ["-date", "timeslot"]
 
     def clean(self):
         if self.date <= date.today():
-            raise ValidationError('The date must be tomorrow or later.')
+            raise ValidationError("The date must be tomorrow or later.")
 
         start_time = time(9, 0)
         end_time = time(15, 30)
 
         if not (start_time <= self.timeslot <= end_time):
-            raise ValidationError(f'Time must be between {start_time} and {end_time}')
+            raise ValidationError(f"Time must be between {start_time} and {end_time}")
 
         if self.timeslot.minute % 30 != 0 or self.timeslot.second != 0:
-            raise ValidationError('Time must be in 30-minute intervals.')
+            raise ValidationError("Time must be in 30-minute intervals.")
 
     def __str__(self):
         return f"{self.purpose} [{self.user.email}]"
+
+
+class Email(models.Model):
+    type = models.CharField(max_length=100)
+    subject = models.CharField(max_length=255)
+    message = models.TextField()
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.type}: {self.subject}"

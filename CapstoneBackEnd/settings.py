@@ -173,10 +173,11 @@ CORS_ALLOW_HEADERS = ["Content-Type", "Authorization"]
 
 # AWS Email SES Settings
 EMAIL_BACKEND = "django_ses.SESBackend"
-AWS_ACCESS_KEY = config("AWS_ACCESS_KEY_ID")
-AWS_SECRET_KEY = config("AWS_SECRET_ACCESS_KEY_ID")
+AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY_ID")
 AWS_REGION_NAME = config("AWS_SES_REGION_NAME", default="ap-southeast-1")
 AWS_SES_REGION_ENDPOINT = config(
     "AWS_SES_REGION_ENDPOINT", default="email.ap-southeast-1.amazonaws.com"
 )
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
+EMAIL_DEBUG = True

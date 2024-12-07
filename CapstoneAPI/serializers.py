@@ -1,6 +1,10 @@
-from djoser.serializers import UserCreateSerializer, UserSerializer, UserCreatePasswordRetypeSerializer
+from djoser.serializers import (
+    UserCreateSerializer,
+    UserSerializer,
+    UserCreatePasswordRetypeSerializer,
+)
 from rest_framework import serializers
-from .models import CustomUser, BarangayDocument, Requirement, Schedule
+from .models import CustomUser, BarangayDocument, Requirement, Schedule, Email
 from datetime import date, time, datetime, timedelta
 
 
@@ -9,16 +13,24 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
     class Meta(UserCreateSerializer.Meta):
         model = CustomUser
-        fields = ('id', 'firstname', 'lastname', 'birthday', 'email', 'password', 'password2')
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = (
+            "id",
+            "firstname",
+            "lastname",
+            "birthday",
+            "email",
+            "password",
+            "password2",
+        )
+        extra_kwargs = {"password": {"write_only": True}}
 
     def validate(self, data):
-        if data['password'] != data['password2']:
+        if data["password"] != data["password2"]:
             raise serializers.ValidationError("Password do not match")
         return data
 
     def create(self, validated_data):
-        validated_data.pop('password2')
+        validated_data.pop("password2")
         user = CustomUser.objects.create_user(**validated_data)
         return user
 
@@ -26,25 +38,27 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 class CustomUserSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):
         model = CustomUser
-        fields = ('id', 'email', 'firstname', 'lastname', 'birthday', 'is_staff')
+        fields = ("id", "email", "firstname", "lastname", "birthday", "is_staff")
 
 
 class RequirementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Requirement
-        fields = ('id', 'name')
+        fields = ("id", "name")
 
 
 class BarangayDocumentSerializer(serializers.ModelSerializer):
     requirements = RequirementSerializer(many=True, required=False)
-    requirement_ids = serializers.PrimaryKeyRelatedField(queryset=Requirement.objects.all(), many=True, write_only=True)
+    requirement_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Requirement.objects.all(), many=True, write_only=True
+    )
 
     class Meta:
         model = BarangayDocument
-        fields = ['id', 'name', 'description', 'requirements', 'requirement_ids']
+        fields = ["id", "name", "description", "requirements", "requirement_ids"]
 
     def create(self, validated_data):
-        requirements = validated_data.pop('requirement_ids')
+        requirements = validated_data.pop("requirement_ids")
         document = BarangayDocument.objects.create(**validated_data)
         document.requirements.set(requirements)
         return document
@@ -53,14 +67,26 @@ class BarangayDocumentSerializer(serializers.ModelSerializer):
 class ScheduleSerializer(serializers.ModelSerializer):
     # purpose and document_id points to same thing.
     # user = CustomUserSerializer(required=True)
-    user = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), required=True)
-    purpose = serializers.PrimaryKeyRelatedField(queryset=BarangayDocument.objects.all())
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=CustomUser.objects.all(), required=True
+    )
+    purpose = serializers.PrimaryKeyRelatedField(
+        queryset=BarangayDocument.objects.all()
+    )
     purpose_name = serializers.SerializerMethodField()
-
 
     class Meta:
         model = Schedule
-        fields = ['id', 'user', 'date', 'purpose', 'purpose_name', 'timeslot', 'status', "status_history"]
+        fields = [
+            "id",
+            "user",
+            "date",
+            "purpose",
+            "purpose_name",
+            "timeslot",
+            "status",
+            "status_history",
+        ]
 
     def get_purpose_name(self, obj):
         if obj.purpose:
@@ -73,10 +99,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
 
         if "status" in validated_data:
             status = validated_data.get("status")
-            mapping = {
-                "pending": "ongoing",
-                "ongoing": "done"
-            }
+            mapping = {"pending": "ongoing", "ongoing": "done"}
             instance.status = mapping[status]
 
         for attr, value in validated_data.items():
@@ -89,7 +112,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
     def validate_date(self, value):
         if not self.instance:
             if value <= date.today():
-                raise serializers.ValidationError('The date must be tomorrow or later.')
+                raise serializers.ValidationError("The date must be tomorrow or later.")
         return value
 
     def validate_timeslot(self, value):
@@ -97,18 +120,22 @@ class ScheduleSerializer(serializers.ModelSerializer):
         end_time = time(15, 30)
 
         if not (start_time <= value <= end_time):
-            raise serializers.ValidationError(f'Time must be between {start_time} and {end_time}.')
+            raise serializers.ValidationError(
+                f"Time must be between {start_time} and {end_time}."
+            )
 
         if value.minute % 30 != 0 or value.second != 0:
-            raise serializers.ValidationError('Time must be in 30-minute intervals.')
+            raise serializers.ValidationError("Time must be in 30-minute intervals.")
         return value
 
     def validate(self, data):
-        date = data.get('date')
-        timeslot = data.get('timeslot')
+        date = data.get("date")
+        timeslot = data.get("timeslot")
 
         if Schedule.objects.filter(date=date, timeslot=timeslot).exists():
-            raise serializers.ValidationError("A schedule already exists for this date and time.")
+            raise serializers.ValidationError(
+                "A schedule already exists for this date and time."
+            )
         return data
 
     def create(self, validated_data):
@@ -129,7 +156,7 @@ class AvailableTimeSlotSerializer(serializers.Serializer):
     def get_available_slots(self):
         selected_date = self.validated_data["selected_date"]
 
-        start_time = datetime.combine(selected_date, time(9,0))
+        start_time = datetime.combine(selected_date, time(9, 0))
         end_time = datetime.combine(selected_date, time(15, 30))
         interval = timedelta(minutes=30)
         all_slots = []
@@ -138,8 +165,17 @@ class AvailableTimeSlotSerializer(serializers.Serializer):
             all_slots.append(start_time.time())
             start_time += interval
 
-        booked_slots = Schedule.objects.filter(date=selected_date).values_list("timeslot", flat=True)
-        available_slots = [slot.strftime("%H:%M") for slot in all_slots if slot not in booked_slots]
+        booked_slots = Schedule.objects.filter(date=selected_date).values_list(
+            "timeslot", flat=True
+        )
+        available_slots = [
+            slot.strftime("%H:%M") for slot in all_slots if slot not in booked_slots
+        ]
 
         return available_slots
 
+
+class EmailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Email
+        fields = ["id", "subject", "message", "type", "date_created"]

@@ -4,11 +4,25 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.filters import OrderingFilter
-from .serializers import CustomUserSerializer, BarangayDocumentSerializer, ScheduleSerializer, AvailableTimeSlotSerializer
+from .serializers import (
+    CustomUserSerializer,
+    BarangayDocumentSerializer,
+    ScheduleSerializer,
+    AvailableTimeSlotSerializer,
+    EmailSerializer,
+)
+
+from string import Template
+from types import SimpleNamespace
+import json
+
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import BarangayDocument, Schedule
+from .models import BarangayDocument, Schedule, Email
 from django.shortcuts import get_object_or_404
 from datetime import datetime
+
+from django.http import JsonResponse
+from CapstoneAPI.email_utils import send_email_with_ses
 
 
 User = get_user_model()
@@ -55,9 +69,15 @@ class BarangayDocumentListView(APIView):
 
     def post(self, request):
         if not request.user.is_authenticated:
-            return Response({'detail': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {"detail": "Authentication required"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
         if not request.user.is_staff:
-            return Response({'detail': 'User not allowed, this will be reported.'}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": "User not allowed, this will be reported."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         serializer = BarangayDocumentSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -69,7 +89,7 @@ class BarangayDocumentListView(APIView):
 class ScheduleView(GenericAPIView):
     serializer_class = ScheduleSerializer
     filter_backends = [OrderingFilter]
-    ordering_fields = ['date', 'timeslot', 'status']
+    ordering_fields = ["date", "timeslot", "status"]
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -93,7 +113,8 @@ class ScheduleView(GenericAPIView):
                     queryset = queryset.filter(date=date_obj)
                 except ValueError:
                     return Response(
-                        {"error": "Invalid date format. User YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST
+                        {"error": "Invalid date format. User YYYY-MM-DD."},
+                        status=status.HTTP_400_BAD_REQUEST,
                     )
 
             serializer = self.get_serializer(queryset, many=True)
@@ -103,36 +124,50 @@ class ScheduleView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             schedule = serializer.save()
-            return Response({"message": "Created Successfully", "data": serializer.data}, status=status.HTTP_201_CREATED)
-        return Response({
-            "errors": serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "Created Successfully", "data": serializer.data},
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(
+            {"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST
+        )
 
     def patch(self, request, pk=None):
 
         if not pk:
-            return Response({"error": "Appointment id is required for updating status"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Appointment id is required for updating status"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         schedule = get_object_or_404(self.get_queryset(), pk=pk)
         new_status = request.data.get("status")
 
         if not new_status:
-            return Response({"error": "Status field is required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Status field is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         if new_status not in dict(Schedule.STATUS_CHOICES).keys():
-            return Response({"error": f"Invalid status value. Allowed values are {', '.join(dict(Schedule.STATUS_CHOICES).keys())}"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "error": f"Invalid status value. Allowed values are {', '.join(dict(Schedule.STATUS_CHOICES).keys())}"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         if schedule.status != new_status:
-            schedule.status_history.append({
-                "status": schedule.status,
-                "timestamp": datetime.now().isoformat()
-            })
+            schedule.status_history.append(
+                {"status": schedule.status, "timestamp": datetime.now().isoformat()}
+            )
 
             schedule.status = new_status
             schedule.save()
 
         serializer = self.get_serializer(schedule)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class AvailableTimeSlotView(APIView):
     def post(self, request, *args, **kwargs):
@@ -143,5 +178,53 @@ class AvailableTimeSlotView(APIView):
 
             if not available_slots:
                 return Response({"available_slots": []}, status=status.HTTP_200_OK)
-            return Response({"available_slots": available_slots}, status=status.HTTP_200_OK)
+            return Response(
+                {"available_slots": available_slots}, status=status.HTTP_200_OK
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EmailView(APIView):
+    def get(self, request, type):
+        email = get_object_or_404(Email, type=type)
+        serializer = EmailSerializer(email)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        email = self.get(request, kwargs["type"])
+        email = self.generate_email(request.data, email.data)
+        response = send_email_with_ses(
+            email.subject, email.message, request.data["recipient"]
+        )
+        if response:
+            return JsonResponse(
+                {"message": "Email sent successfully", "response": response},
+                status=status.HTTP_200_OK,
+            )
+        return JsonResponse(
+            {"message": "Failed to send email"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    @staticmethod
+    def extract_requirements(requirements):
+        data = []
+        for i, requirement in enumerate(requirements, 1):
+            data.append(f"\t{i}. {requirement}")
+        return "\n".join(data)
+
+    def generate_email(self, request, email):
+        details = SimpleNamespace(**request)
+        email = SimpleNamespace(**email)
+
+        requirements = self.extract_requirements(details.requirements)
+        message = Template(email.message).substitute(
+            user=details.user,
+            status=details.status,
+            document=details.document,
+            date=details.date,
+            time=details.time,
+            requirements=requirements,
+        )
+        email.message = message
+        return email
