@@ -210,18 +210,19 @@ class EmailView(APIView):
     def extract_requirements(requirements):
         data = []
         for i, requirement in enumerate(requirements, 1):
-            data.append(f"\t{i}. {requirement}")
+            data.append(f"\t{i}. {requirement["name"]}")
         return "\n".join(data)
 
     def generate_email(self, request, email):
         details = SimpleNamespace(**request)
         email = SimpleNamespace(**email)
+        document = get_object_or_404(BarangayDocument, id=details.document)
 
         requirements = self.extract_requirements(details.requirements)
         message = Template(email.message).substitute(
             user=details.user,
             status=details.status,
-            document=details.document,
+            document=document,
             date=details.date,
             time=details.time,
             requirements=requirements,
