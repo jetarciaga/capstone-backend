@@ -12,6 +12,8 @@ django-cors-headers = "*"
 boto3 = "*"
 python-decouple = "*"
 setuptools = "*"
+gunicorn = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 
