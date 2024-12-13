@@ -11,8 +11,9 @@ djoser = "*"
 django-cors-headers = "*"
 boto3 = "*"
 python-decouple = "*"
+setuptools = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.12"
+python_version = "3.13"
