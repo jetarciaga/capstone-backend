@@ -33,16 +33,16 @@ jobs:
             cd /home/ubuntu/app
 
             echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" > .env
-            echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" > .env
-            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" > .env
-            echo "POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}" > .env
-            echo "POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}" > .env
-            echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" > .env
-            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" > .env
-            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" > .env
-            echo "AWS_REGION_NAME=${{ secrets.AWS_REGION_NAME }}" > .env
-            echo "AWS_SES_REGION_ENDPOINT=${{ secrets.AWS_SES_REGION_ENDPOINT }}" > .env
-            echo "DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }}" > .env
+            echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+            echo "POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}" >> .env
+            echo "POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}" >> .env
+            echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
+            echo "AWS_REGION_NAME=${{ secrets.AWS_REGION_NAME }}" >> .env
+            echo "AWS_SES_REGION_ENDPOINT=${{ secrets.AWS_SES_REGION_ENDPOINT }}" >> .env
+            echo "DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }}" >> .env
 
             git pull origin main
             docker-compose down --volumes
