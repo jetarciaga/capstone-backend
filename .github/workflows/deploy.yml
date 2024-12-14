@@ -43,6 +43,7 @@ jobs:
             echo "AWS_REGION_NAME=${{ secrets.AWS_REGION_NAME }}" >> .env
             echo "AWS_SES_REGION_ENDPOINT=${{ secrets.AWS_SES_REGION_ENDPOINT }}" >> .env
             echo "DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }}" >> .env
+            echo "DJANGO_DEBUG=${{ secrets.DJANGO_DEBUG }}" >> .env
 
             git pull origin main
             docker-compose down --volumes
