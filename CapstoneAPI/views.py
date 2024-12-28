@@ -36,6 +36,9 @@ class UserList(APIView):
             users = get_object_or_404(User, pk=pk)
             serializer = CustomUserSerializer(users)
             return Response(serializer.data, status=status.HTTP_200_OK)
+        elif request.query_params.get("all"):
+            users = User.objects.all()
+            serializer = CustomUserSerializer(users, many=True)
         # if request.user.is_staff:
         #     users = User.objects.all()
         #     serializer = CustomUserSerializer(users, many=True)
