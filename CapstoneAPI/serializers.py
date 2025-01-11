@@ -154,8 +154,8 @@ class ScheduleSerializer(serializers.ModelSerializer):
         return f"BP{ref_no}{count+1}"
 
     def create(self, validated_data):
-        # ref_no = self.generate_reference_number(validated_data)
-        # validated_data.update({"reference_no": ref_no})
+        ref_no = self.generate_reference_number(validated_data)
+        validated_data.update({"reference_no": ref_no})
 
         schedule = Schedule.objects.create(**validated_data)
         return schedule
