@@ -224,7 +224,7 @@ class EmailView(APIView):
 
         requirements = self.extract_requirements(details.requirements)
         message = Template(email.message).substitute(
-            reference_number=details.reference_no,
+            reference_number=details.reference_number,
             user=details.user,
             status=details.status,
             document=document,
