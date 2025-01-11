@@ -220,9 +220,11 @@ class EmailView(APIView):
         details = SimpleNamespace(**request)
         email = SimpleNamespace(**email)
         document = get_object_or_404(BarangayDocument, id=details.document)
+        print("CHECK", request)
 
         requirements = self.extract_requirements(details.requirements)
         message = Template(email.message).substitute(
+            # reference_number=,
             user=details.user,
             status=details.status,
             document=document,
