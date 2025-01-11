@@ -87,7 +87,7 @@ class Schedule(models.Model):
     timeslot = models.TimeField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
     status_history = models.JSONField(default=list)
-    reference_no = models.CharField(max_length=12, unique=True)
+    reference_no = models.CharField(max_length=12, unique=True, null=True)
 
     class Meta:
         constraints = [
