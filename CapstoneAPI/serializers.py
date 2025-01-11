@@ -94,6 +94,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
             "timeslot",
             "status",
             "status_history",
+            "reference_no",
         ]
 
     def get_purpose_name(self, obj):
@@ -146,9 +147,16 @@ class ScheduleSerializer(serializers.ModelSerializer):
             )
         return data
 
+    def generate_reference_number(self, data):
+        selected_date: datetime.date = data.get("date")
+        count = Schedule.objects.filter(date=selected_date).count()
+        ref_no = selected_date.strftime("%y%m%d")
+        return f"BP{ref_no}{count+1}"
+
     def create(self, validated_data):
-        # document = validated_data.pop('document_id')
-        # validated_data["purpose"] = document
+        ref_no = self.generate_reference_number(validated_data)
+        validated_data.update({"reference_no": ref_no})
+
         schedule = Schedule.objects.create(**validated_data)
         return schedule
 
