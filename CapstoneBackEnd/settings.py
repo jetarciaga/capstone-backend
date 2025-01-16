@@ -184,6 +184,7 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_HEADERS = ["Content-Type", "Authorization"]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
+    "http://frontend-online-appointment-putatan.s3-website-ap-southeast-1.amazonaws.com",
 ]
 
 # AWS Email SES Settings
