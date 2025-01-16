@@ -27,9 +27,15 @@ from datetime import datetime
 
 from django.http import JsonResponse
 from CapstoneAPI.email_utils import send_email_with_ses
+from django.middleware.csrf import get_token
 
 
 User = get_user_model()
+
+
+def csrf_token_view(request):
+    token = get_token(request)
+    return JsonResponse({"csrfToken": token})
 
 
 @method_decorator(csrf_exempt, name="dispatch")

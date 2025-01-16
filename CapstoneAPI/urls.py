@@ -7,11 +7,13 @@ from .views import (
     AvailableTimeSlotView,
     BarangayRequirementsListView,
     EmailView,
+    csrf_token_view,
 )
 
 app_name = "capstoneapi"
 
 urlpatterns = [
+    path("csrf-token/", csrf_token_view, name="csrf_token"),
     path("email/<str:type>", EmailView.as_view(), name="email"),
     path("users/", UserList.as_view(), name="user-list"),
     path("users/<int:pk>/", UserList.as_view(), name="user"),

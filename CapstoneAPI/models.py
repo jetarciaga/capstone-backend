@@ -68,7 +68,7 @@ class UserProfile(models.Model):
     middlename = models.CharField(max_length=100, blank=True, null=True)
     civil_status = models.CharField(max_length=50, choices=STATUS, default="single")
     address = models.CharField(max_length=255, blank=True)
-    mobile = PhoneNumberField(region="PH", null=True)
+    mobile = PhoneNumberField(region="PH", null=True, blank=True)
 
     def __str__(self):
         return self.user.email
