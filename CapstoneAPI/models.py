@@ -71,7 +71,7 @@ class UserProfile(models.Model):
     mobile = PhoneNumberField(region="PH", null=True, blank=True)
 
     def __str__(self):
-        return self.user.email
+        return f"{self.user.email}"
 
 
 class BarangayDocument(models.Model):
