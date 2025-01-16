@@ -4,13 +4,17 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.filters import OrderingFilter
+from .models import CustomUser
 from .serializers import (
     CustomUserSerializer,
     BarangayDocumentSerializer,
     ScheduleSerializer,
     AvailableTimeSlotSerializer,
     EmailSerializer,
+    UserProfileSerializer,
 )
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 from string import Template
 from types import SimpleNamespace
@@ -28,6 +32,7 @@ from CapstoneAPI.email_utils import send_email_with_ses
 User = get_user_model()
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class UserList(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -46,6 +51,18 @@ class UserList(APIView):
             users = request.user
             serializer = CustomUserSerializer(users)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request, pk=None):
+        if pk:
+            user = get_object_or_404(CustomUser, pk=pk)
+        else:
+            user = request.user
+
+        serializer = CustomUserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class BarangayDocumentAPIView(APIView):

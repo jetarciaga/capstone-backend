@@ -9,6 +9,7 @@ from django.conf import settings
 from datetime import time, date, timedelta, datetime
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
+from phonenumber_field.modelfields import PhoneNumberField
 
 
 class CustomUserManager(BaseUserManager):
@@ -51,6 +52,26 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+class UserProfile(models.Model):
+    STATUS = [
+        ("single", "Single"),
+        ("married", "Married"),
+        ("separated", "Separated"),
+        ("widowed", "Widowed"),
+        ("in_a_civil_partnership", "In a civil partnership"),
+    ]
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile"
+    )
+    middlename = models.CharField(max_length=100, blank=True, null=True)
+    civil_status = models.CharField(max_length=50, choices=STATUS, default="single")
+    address = models.CharField(max_length=255, blank=True)
+    mobile = PhoneNumberField(region="PH", null=True)
+
+    def __str__(self):
+        return self.user.email
 
 
 class BarangayDocument(models.Model):

@@ -15,6 +15,8 @@ setuptools = "*"
 gunicorn = "*"
 psycopg2-binary = "*"
 whitenoise = "*"
+django-phonenumber-field = "*"
+phonenumbers = "*"
 
 [dev-packages]
 

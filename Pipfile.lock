@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "1d83a50980c926f9989f64cb2dcbd255cccf8c7dd2fd1a5c62121f264cfec559"
+            "sha256": "f27062dc3a76b72183d2942ca71a90833f7158ba93810948f6714bf96f15ec15"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -276,12 +276,12 @@
         },
         "django": {
             "hashes": [
-                "sha256:236e023f021f5ce7dee5779de7b286565fdea5f4ab86bae5338e3f7b69896cf0",
-                "sha256:de450c09e91879fa5a307f696e57c851955c910a438a35e6b4c895e86bedc82a"
+                "sha256:19bbca786df50b9eca23cee79d495facf55c8f5c54c529d9bf1fe7b5ea086af3",
+                "sha256:c46eb936111fffe6ec4bc9930035524a8be98ec2f74d8a0ff351226a3e52f459"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.10'",
-            "version": "==5.1.4"
+            "version": "==5.1.5"
         },
         "django-cors-headers": {
             "hashes": [
@@ -291,6 +291,15 @@
             "index": "pypi",
             "markers": "python_version >= '3.9'",
             "version": "==4.6.0"
+        },
+        "django-phonenumber-field": {
+            "hashes": [
+                "sha256:196c917b70c01a98e327f482eb8a4a4a55a29891db551f99078585397370b3ba",
+                "sha256:8a560fe1b01b94c9de8cde22bc373b695f023cc6df4baba00264cb079da9f631"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.8'",
+            "version": "==8.0.0"
         },
         "djangorestframework": {
             "hashes": [
@@ -359,6 +368,14 @@
             ],
             "markers": "python_version >= '3.8'",
             "version": "==24.2"
+        },
+        "phonenumbers": {
+            "hashes": [
+                "sha256:e803210038ece9d208b129e3023dc20e656a820d6bf6f1cb0471d4164f54bada",
+                "sha256:fdc371ea6a4da052beb1225de63963d5a2fddbbff2bb53e3a957f360e0185f80"
+            ],
+            "index": "pypi",
+            "version": "==8.13.52"
         },
         "psycopg2-binary": {
             "hashes": [
