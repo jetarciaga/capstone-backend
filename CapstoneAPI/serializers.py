@@ -10,7 +10,6 @@ from .models import (
     Requirement,
     Schedule,
     Email,
-    UserProfile,
 )
 from datetime import date, time, datetime, timedelta
 
@@ -42,14 +41,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         return user
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserProfile
-        fields = ("middlename", "civil_status", "address", "mobile")
-
-
 class CustomUserSerializer(UserSerializer):
-    profile = UserProfileSerializer()
 
     class Meta(UserSerializer.Meta):
         model = CustomUser
@@ -57,24 +49,21 @@ class CustomUserSerializer(UserSerializer):
             "id",
             "email",
             "firstname",
+            "middlename",
             "lastname",
             "birthday",
+            "civil_status",
+            "address",
+            "mobile",
             "is_staff",
             "date_joined",
-            "profile",
         )
 
-    def update(self, instance, validated_data):
-        profile_data = validated_data.pop("profile", None)
-        user = super().update(instance, validated_data)
-
-        if profile_data:
-            print(user)
-            profile, created = UserProfile.objects.get_or_create(user=user)
-            for attr, value in profile_data.items():
-                setattr(profile, attr, value)
-            profile.save()
-        return user
+    # def update(self, instance, validated_data):
+    #     user = super().update(instance, validated_data)
+    #     print("WHY HERE")
+    #     print(user)
+    #     return user
 
 
 class RequirementSerializer(serializers.ModelSerializer):
