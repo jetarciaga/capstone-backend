@@ -44,8 +44,11 @@ class CustomUserAdmin(UserAdmin):
                 "classes": ("wide",),
                 "fields": (
                     "firstname",
-                    "lastname",
+                    "middlename" "lastname",
                     "birthday",
+                    "civil_status",
+                    "address",
+                    "mobile",
                     "email",
                     "password1",
                     "password2",
