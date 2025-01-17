@@ -36,10 +36,22 @@ class CustomUserManager(BaseUserManager):
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
+    STATUS = [
+        ("single", "Single"),
+        ("married", "Married"),
+        ("separated", "Separated"),
+        ("widowed", "Widowed"),
+        ("in_a_civil_partnership", "In a civil partnership"),
+    ]
+
     email = models.EmailField(_("email"), unique=True)
     firstname = models.CharField(max_length=50, blank=True)
+    middlename = models.CharField(max_length=50, blank=True)
     lastname = models.CharField(max_length=50, blank=True)
     birthday = models.DateField(null=True, blank=True)
+    civil_status = models.CharField(max_length=100, choices=STATUS, default="single")
+    address = models.CharField(max_length=255, blank=True)
+    mobile = PhoneNumberField(region="PH", null=True, blank=True)
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
@@ -52,26 +64,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
-
-
-class UserProfile(models.Model):
-    STATUS = [
-        ("single", "Single"),
-        ("married", "Married"),
-        ("separated", "Separated"),
-        ("widowed", "Widowed"),
-        ("in_a_civil_partnership", "In a civil partnership"),
-    ]
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile"
-    )
-    middlename = models.CharField(max_length=100, blank=True, null=True)
-    civil_status = models.CharField(max_length=50, choices=STATUS, default="single")
-    address = models.CharField(max_length=255, blank=True)
-    mobile = PhoneNumberField(region="PH", null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.user.email}"
 
 
 class BarangayDocument(models.Model):
