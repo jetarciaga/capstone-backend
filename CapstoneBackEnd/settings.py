@@ -163,7 +163,7 @@ DJOSER = {
     "USER_ID_FIELD": "email",
     "LOGIN_FIELD": "email",
     "PASSWORD_RESET_CONFIRM_URL": "reset/password/{uid}/{token}/",
-    "DOMAIN": "http://localhost:3000",  # change this is production
+    "DOMAIN": "http://frontend-online-appointment-putatan.s3-website-ap-southeast-1.amazonaws.com",  # change this is production
     "SITE_NAME": "React App",
     "SERIALIZERS": {
         "user_create": "CapstoneAPI.serializers.CustomUserCreateSerializer",
