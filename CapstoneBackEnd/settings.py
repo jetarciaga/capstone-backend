@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
     "rest_framework",
     # 'rest_framework.authtoken',
     "rest_framework_simplejwt",
@@ -45,7 +46,10 @@ INSTALLED_APPS = [
     "CapstoneAPI",
     "djoser",
     "corsheaders",
+    "django_ses",
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -148,7 +152,7 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-        "rest_framework.authentication.TokenAuthentication",
+        # "rest_framework.authentication.TokenAuthentication",
         # "rest_framework.authentication.SessionAuthentication",  # remove before going to production
     ),
 }
@@ -158,9 +162,15 @@ AUTH_USER_MODEL = "CapstoneAPI.CustomUser"
 DJOSER = {
     "USER_ID_FIELD": "email",
     "LOGIN_FIELD": "email",
+    "PASSWORD_RESET_CONFIRM_URL": "reset/password/{uid}/{token}/",
+    "DOMAIN": "http://localhost:3000",  # change this is production
+    "SITE_NAME": "React App",
     "SERIALIZERS": {
         "user_create": "CapstoneAPI.serializers.CustomUserCreateSerializer",
         "user": "CapstoneAPI.serializers.CustomUserSerializer",
+    },
+    "EMAIL": {
+        "password_reset": "djoser.email.PasswordResetEmail",
     },
 }
 
@@ -192,6 +202,7 @@ EMAIL_BACKEND = "django_ses.SESBackend"
 AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
 AWS_REGION_NAME = config("AWS_SES_REGION_NAME", default="ap-southeast-1")
+AWS_SES_REGION_NAME = config("AWS_SES_REGION_NAME", default="ap-southeast-1")
 AWS_SES_REGION_ENDPOINT = config(
     "AWS_SES_REGION_ENDPOINT", default="email.ap-southeast-1.amazonaws.com"
 )
